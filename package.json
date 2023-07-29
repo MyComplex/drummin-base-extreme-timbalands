@@ -1,0 +1,28 @@
+{
+  "name": "drummin-base-extreme-timbalands",
+  "version": "1.0.0",
+  "description": "Employee Management Application",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MyComplex/drummin-base-extreme-timbalands.git"
+  },
+  "keywords": [
+    "Employee",
+    "Management"
+  ],
+  "author": "Jesus Santos",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MyComplex/drummin-base-extreme-timbalands/issues"
+  },
+  "homepage": "https://github.com/MyComplex/drummin-base-extreme-timbalands#readme",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "inquirer": "8.2.4",
+    "mysql2": "^3.5.2"
+  }
+}
