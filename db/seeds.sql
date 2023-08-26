@@ -6,11 +6,11 @@ VALUES  (1, 'Executive'),
         (5, 'Information Technology');
 
 INSERT INTO role (id, title, salary, department_id)
-VALUES  (1, 'Chief Executive Officer', 25000000000, 1),
-        (2, 'Chief Human Resources Officer', 25000000000, 2),
-        (3, 'Chief Marketing Officer', 25000000000, 3),
-        (4, 'Chief Financial Officer', 25000000000, 4),
-        (5, 'Chief Technology Officer', 25000000000, 5);
+VALUES  (1, 'Chief Executive Officer', 250000000.00, 1),
+        (2, 'Chief Human Resources Officer', 125000000.00, 2),
+        (3, 'Chief Marketing Officer', 150000000.00, 3),
+        (4, 'Chief Financial Officer', 200000000.00, 4),
+        (5, 'Chief Technology Officer', 200000000.00, 5);
 
 INSERT INTO employee (id, first_name, last_name, role_id, manager_id)
 VALUES  (1, 'Ximena', 'Ordonez', 1),
