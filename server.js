@@ -158,11 +158,70 @@ const addRole = () => {
 
 /* ADD AN EMPLOYEE */
 const addEmployee = () => {
-    connection.query("SELECT id AS ID, title AS TITLE, salary AS SALARY FROM role", function (err, res) {
+    let managerNames = [];
+    let roleNames = [];
+    connection.query("SELECT CONCAT(first_name, ' ', last_name) AS manager FROM employee", function (err, res) {
         if (err) throw err;
-        console.table(res);
-        mainMenu();
-    });
+        res.forEach(element => {
+            managerNames.push(element.manager);
+        })
+    })
+    connection.query("SELECT title FROM role", function (err, res) {
+        if (err) throw err;
+        res.forEach(element => {
+            roleNames.push(element.title);
+        })
+    })
+    inquirer.prompt([
+        {
+            name: 'newEmpFirstName',
+            type: 'input',
+            message: 'Enter the first name of the new employee:'
+        },
+        {
+            name: 'newEmpLastName',
+            type: 'input',
+            message: 'Enter the last name of the new employee:'
+        },
+        {
+            name: 'newEmpRole',
+            type: 'list',
+            message: 'Select the title of the new employee:',
+            choices: roleNames
+        },
+        {
+            name: 'newEmpMngr',
+            type: 'list',
+            message: 'Select the manager of the new employee:',
+            choices: managerNames
+        }
+    ])
+        .then((answer) => {
+            let manager;
+            let role;
+            connection.query("SELECT id, CONCAT(first_name, ' ', last_name) AS manager FROM employee WHERE manager =?", answer.newEmpMngr, function (err, res) {
+                if (err) throw err;
+                manager = res;
+            })
+            connection.query("SELECT id, title FROM role WHERE title =?", answer.newEmpRole, function (err, res) {
+                if (err) throw err;
+                role = res;
+                
+                connection.query("INSERT INTO employee SET?", {
+                    first_name: answer.newEmpFirstName,
+                    last_name: answer.newEmpLastName,
+                    role_id: role[0].id,
+                    manager_id: manager[0].id
+                },
+                    function (err) {
+                        if (err) throw err;
+                    })
+                console.log("");
+                console.log("Employee added!");
+                console.log("");
+            })
+            mainMenu();
+        })
 };
 
 /* VIEW ALL ROLES */
