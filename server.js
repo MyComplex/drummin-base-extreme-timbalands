@@ -232,11 +232,49 @@ const addEmployee = () => {
 
 /* UPDATE ROLE */
 const updateEmployeeRole = () => {
-    connection.query("SELECT id AS ID, title AS TITLE, salary AS SALARY FROM role", function (err, res) {
+    let employeeNames = [];
+    let roleNames = [];
+    connection.query("SELECT CONCAT(first_name, ' ', last_name) AS employee FROM employee", function (err, res) {
         if (err) throw err;
-        console.table(res);
-        mainMenu();
-    });
+        res.forEach(element => {
+            employeeNames.push(element.employee);
+        })
+        connection.query("SELECT title FROM role", function (err, res) {
+            if (err) throw err;
+            res.forEach(element => {
+                roleNames.push(element.title);
+            })
+            inquirer.prompt([
+                {
+                    name: 'empNames',
+                    type: 'list',
+                    message: 'Select the manager of the new employee:',
+                    choices: employeeNames
+                },
+                {
+                    name: 'roleNames',
+                    type: 'list',
+                    message: 'Select the title of the new employee:',
+                    choices: roleNames
+                }
+            ]).then((answers) => {
+                let role;
+                connection.query("SELECT id, title FROM role WHERE title =?", answers.roleNames, function (err, roleres) {
+                    if (err) throw err;
+                    role = roleres;
+                    // connection.query("UPDATE employee SET role_id = ? WHERE CONCAT(first_name, ' ', last_name) = ?", role[0].id, answers.empName, {
+                    //     function(err) {
+                    //         if (err) throw err;
+
+                    //         console.log("");
+                    //         console.log("The empoyee's role has been changed!");
+                    //         viewEmployees();
+                    //     }
+                    // });
+                })
+            })
+        })
+    })
 };
 
 connectDb();
