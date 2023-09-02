@@ -20,17 +20,9 @@ A simple console application that allows you to perform basic employee managemen
 
 This application is built on top of the following technologies:
 
-![Node.js] (https://opengraph.github.com/87d4ede2-8523-4fca-9c80-52b0bd8c6e5b/nodejs/node)
-
-![MySQL] (https://opengraph.github.com/f5588c86-0ac8-42b1-b428-bdb3aa671892/mysql/mysql-server)
-
-![Inquirer.js] (https://opengraph.githubassets.com/49a3f869-734c-4b95-ad72-16e6bb09366c/SBoudrias/inquirer.js)
-
-![mysql2] (https://opengraph.githubassets.com/a54e4cec-73c7-4f64-8644-7de0000bc5ee/sidorares/node-mysql2)
-
-![dotenv] (https://opengraph.githubassets.com/0cca3ffd-ef05-4b3c-afe0-43fd75a69d97/motdotla/dotenv)
-
-![easy-table] (https://opengraph.githubassets.com/b9847a7a-2a15-4070-9b2e-cdf78fa77672/eldargab/easy-table)
+<img src="https://opengraph.github.com/87d4ede2-8523-4fca-9c80-52b0bd8c6e5b/nodejs/node" alt="node.js" style="width:25rem"> <img src="https://opengraph.github.com/f5588c86-0ac8-42b1-b428-bdb3aa671892/mysql/mysql-server" alt="MySQL" style="width:25rem">
+<img src="https://opengraph.githubassets.com/49a3f869-734c-4b95-ad72-16e6bb09366c/SBoudrias/inquirer.js" alt="Inquirer.js" style="width:25rem"> <img src="https://opengraph.githubassets.com/a54e4cec-73c7-4f64-8644-7de0000bc5ee/sidorares/node-mysql2" alt="mysql2" style="width:25rem">
+<img src="https://opengraph.githubassets.com/0cca3ffd-ef05-4b3c-afe0-43fd75a69d97/motdotla/dotenv" alt="dotenv" style="width:25rem"> <img src="https://opengraph.githubassets.com/b9847a7a-2a15-4070-9b2e-cdf78fa77672/eldargab/easy-table" alt="easy-table" style="width:25rem">
 
 
 ## Installation
