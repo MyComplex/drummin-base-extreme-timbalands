@@ -4,7 +4,7 @@ const inquirer = require("inquirer");
 const Table = require("easy-table");
 
 /* CONNECT TO DATABASE */
-const empmgmtapp = () => {
+const empmgmtapp = async () => {
     connection.connect(async (err) => {
         if (err) {
             console.log("");
@@ -45,8 +45,8 @@ const empmgmtapp = () => {
 };
 
 /* MAIN MENU FUNCTION */
-const mainMenu = () => {
-    inquirer.prompt([
+const mainMenu = async () => {
+    await inquirer.prompt([
         {
             type: "list",
             name: "menu",
@@ -62,7 +62,7 @@ const mainMenu = () => {
                 "I'm done managing employees",
             ],
         },
-    ]).then((answer) => {
+    ]).then(async (answer) => {
         if (answer.menu === "I'd like to view all employees") {
             viewAllEmployees();
         } else if (answer.menu === "I'd like to add an employee") {
@@ -89,8 +89,8 @@ const mainMenu = () => {
 
 /* INTERACTIVE FUNCTIONS */
 /* VIEW ALL EMPLOYEES */
-const viewAllEmployees = () => {
-    connection.query("SELECT e.id AS ID, e.first_name AS First_Name, e.last_name AS Last_Name, role.title AS Title, department.name AS Department, CONCAT('$',FORMAT(role.salary, 2)) AS Salary, CONCAT(m.first_name, ' ', m.last_name) AS Manager FROM employee AS e LEFT JOIN role ON role.id = e.role_id LEFT JOIN department ON department.id = role.department_id LEFT JOIN employee AS m ON m.id = e.manager_id", (err, res) => {
+const viewAllEmployees = async () => {
+    connection.query("SELECT e.id AS Id, e.first_name AS First_Name, e.last_name AS Last_Name, role.title AS Title, department.name AS Department, CONCAT('$',FORMAT(role.salary, 2)) AS Salary, CONCAT(m.first_name, ' ', m.last_name) AS Manager FROM employee AS e LEFT JOIN role ON role.id = e.role_id LEFT JOIN department ON department.id = role.department_id LEFT JOIN employee AS m ON m.id = e.manager_id", async (err, res) => {
         if (err) {
             console.log("");
             console.log("An error occurred while attempting to retrieve the employees!");
@@ -99,7 +99,7 @@ const viewAllEmployees = () => {
         console.log("");
         console.log(Table.print(res));
         /* CALL MAIN MENU */
-        mainMenu();
+        await mainMenu();
     });
 };
 
@@ -113,7 +113,7 @@ const addAnEmployee = async () => {
             console.log("An error occurred while attempting to retrieve the managers!");
             console.log(`Here's what may be wrong: "${err.message}"`);
         };
-        res.forEach(element => {
+        await res.forEach(element => {
             managerNames.push(element.manager);
         })
     })
@@ -123,7 +123,7 @@ const addAnEmployee = async () => {
             console.log("An error occurred while attempting to retrieve the titles!");
             console.log(`Here's what may be wrong: "${err.message}"`);
         };
-        res.forEach(element => {
+        await res.forEach(element => {
             roleNames.push(element.title);
         })
     })
@@ -150,17 +150,17 @@ const addAnEmployee = async () => {
             message: 'Select the manager of the new employee:',
             choices: managerNames
         }
-    ]).then((answer) => {
+    ]).then(async (answer) => {
         let manager;
         let role;
-        connection.query("SELECT id, first_name, last_name FROM employee WHERE CONCAT(first_name, ' ', last_name) = ?", answer.newEmpMngr, (err, manres) => {
+        connection.query("SELECT id, first_name, last_name FROM employee WHERE CONCAT(first_name, ' ', last_name) = ?", answer.newEmpMngr, async (err, manres) => {
             if (err) {
                 console.log("");
                 console.log("An error occurred while attempting to retrieve the managers!");
                 console.log(`Here's what may be wrong: "${err.message}"`);
             };
             manager = manres;
-            connection.query("SELECT id, title FROM role WHERE title = ?", answer.newEmpRole, (err, rolres) => {
+            connection.query("SELECT id, title FROM role WHERE title = ?", answer.newEmpRole, async (err, rolres) => {
                 if (err) {
                     console.log("");
                     console.log("An error occurred while attempting to retrieve the titles!");
@@ -172,15 +172,15 @@ const addAnEmployee = async () => {
                     last_name: answer.newEmpLastName,
                     role_id: role[0].id,
                     manager_id: manager[0].id
-                }, (err) => {
+                }, async (err) => {
                     if (err) {
                         console.log("");
                         console.log("An error occurred while attempting to create the new employee!");
                         console.log(`Here's what may be wrong: "${err.message}"`);
                     };
                     console.log("");
-                    console.log("Employee added!");
-                    viewAllEmployees();
+                    console.log("The new employee has been added.");
+                    await viewAllEmployees();
                 })
             })
         })
@@ -189,19 +189,76 @@ const addAnEmployee = async () => {
 
 /* UPDATE AN EMPLOYEES ROLE */
 const updateAnEmployeesRole = async () => {
-    connection.query("SELECT id AS ID, title AS TITLE, salary AS SALARY FROM role", async (err, res) => {
+    let employeeNames = [];
+    let roleNames = [];
+    connection.query("SELECT CONCAT(first_name, ' ', last_name) AS employee FROM employee", async (err, empres) => {
         if (err) {
             console.log("");
-            console.log(`An error occurred while attempting to update ! Here's what it contains: "${err.message}"`);
+            console.log("An error occurred while attempting to retrieve employees!");
+            console.log(`Here's what may be wrong: "${err.message}"`);
         };
-        console.table(res);
-        mainMenu();
-    });
+        await empres.forEach(element => {
+            employeeNames.push(element.employee);
+        })
+        connection.query("SELECT title FROM role", async (err, roleres) => {
+            if (err) {
+                console.log("");
+                console.log("An error occurred while attempting to retrieve the titles!");
+                console.log(`Here's what may be wrong: "${err.message}"`);
+            };
+            await roleres.forEach(element => {
+                roleNames.push(element.title);
+            })
+        })
+        await inquirer.prompt([
+            {
+                name: 'empName',
+                type: 'list',
+                message: 'Select the employee you want to reassign:',
+                choices: employeeNames
+            },
+            {
+                name: 'empRole',
+                type: 'list',
+                message: 'Select the new title for the employee:',
+                choices: roleNames
+            }
+        ]).then(async (answers) => {
+            let employee;
+            let role;
+            connection.query("SELECT * FROM employee WHERE CONCAT(first_name, ' ', last_name) = ?", answers.empName, async (err, employeeres) => {
+                if (err) {
+                    console.log("");
+                    console.log("An error occurred while attempting to retrieve the employee!");
+                    console.log(`Here's what may be wrong: "${err.message}"`);
+                };
+                employee = employeeres;
+                connection.query("SELECT * FROM role WHERE title = ?", answers.empRole, async (err, roleres) => {
+                    if (err) {
+                        console.log("");
+                        console.log("An error occurred while attempting to retrieve the title!");
+                        console.log(`Here's what may be wrong: "${err.message}"`);
+                    };
+                    role = roleres;
+                    connection.query("UPDATE employee SET role_id = ? WHERE id = ?", [role[0].id, employee[0].id], async (err) => {
+                        if (err) {
+                            console.log("");
+                            console.log("An error occurred while attempting to update the employee!");
+                            console.log(`Here's what may be wrong: "${err.message}"`);
+                        };
+                        console.log("");
+                        console.log("The employee has been reassigned.");
+                        await viewAllEmployees();
+                    })
+                })
+            })
+        })
+    })
 };
 
 /* VIEW ALL ROLES */
 const viewAllRoles = async () => {
-    connection.query("SELECT role.id AS ID, role.title AS Title, department.name AS Department, CONCAT('$',FORMAT(role.salary, 2)) AS Salary FROM role JOIN department ON department.id = role.department_id", async (err, res) => {
+    connection.query("SELECT role.id AS Id, role.title AS Title, department.name AS Department, CONCAT('$',FORMAT(role.salary, 2)) AS Salary FROM role JOIN department ON department.id = role.department_id", async (err, res) => {
         if (err) {
             console.log("");
             console.log("An error occurred while attempting to retrieve the roles!");
@@ -216,18 +273,18 @@ const viewAllRoles = async () => {
 
 /* ADD A ROLE */
 const addARole = async () => {
-    let deptNameArray = [];
+    let departments = [];
     connection.query("SELECT * FROM department", async (err, res) => {
         if (err) {
             console.log("");
-            console.log("An error occurred while attempting to add a role!");
+            console.log("An error occurred while attempting to retrieve the departments!");
             console.log(`Here's what may be wrong: "${err.message}"`);
         };
-        res.forEach(element => {
-            deptNameArray.push(element.name);
+        await res.forEach(element => {
+            departments.push(element.name);
         });
     });
-    inquirer.prompt([
+    await inquirer.prompt([
         {
             name: 'newRoleTitle',
             type: 'input',
@@ -242,33 +299,38 @@ const addARole = async () => {
             name: 'newRoleDepartment',
             type: 'list',
             message: 'Select the department the new role belongs to:',
-            choices: deptNameArray
+            choices: departments
         },
-    ])
-        .then((answer) => {
-            let departments;
-            connection.query("SELECT * FROM department WHERE name =?", answer.newRoleDepartment, async (err, res) => {
-                if (err) throw err;
-                departments = res;
-                connection.query("INSERT INTO role SET?", {
-                    title: answer.newRoleTitle,
-                    salary: answer.newRoleSalary,
-                    department_id: departments[0].id
-                },
-                    function (err) {
-                        if (err) throw err;
-                    });
+    ]).then(async (answer) => {
+        let department;
+        connection.query("SELECT * FROM department WHERE name = ?", answer.newRoleDepartment, async (err, res) => {
+            if (err) {
                 console.log("");
-                console.log("Role added!");
+                console.log("An error occurred while attempting retrieve the department!");
+                console.log(`Here's what may be wrong: "${err.message}"`);
+            };
+            department = res;
+            connection.query("INSERT INTO role SET ?", {
+                title: answer.newRoleTitle,
+                salary: answer.newRoleSalary,
+                department_id: department[0].id
+            }, async (err) => {
+                if (err) {
+                    console.log("");
+                    console.log("An error occurred while attempting to add a role!");
+                    console.log(`Here's what may be wrong: "${err.message}"`);
+                };
                 console.log("");
-                await viewAllRoles();
+                console.log("A new role has been added.");
             });
+            await viewAllRoles();
         });
+    });
 };
 
 /* VIEW ALL DEPARTMENTS */
 const viewAllDepartments = async () => {
-    connection.query("SELECT id AS ID, name AS Name FROM department", async (err, res) => {
+    connection.query("SELECT id AS Id, name AS Name FROM department", async (err, res) => {
         if (err) {
             console.log("");
             console.log("An error occurred while attempting to retrieve the departments!");
@@ -282,14 +344,14 @@ const viewAllDepartments = async () => {
 
 /* ADD A DEPARTMENT */
 const addADepartment = async () => {
-    inquirer.prompt([
+    await inquirer.prompt([
         {
             name: 'newDepartmentName',
             type: 'input',
             message: 'Enter the name of the new department:'
         }
     ]).then(async (answer) => {
-        connection.query("INSERT INTO department SET?", {
+        connection.query("INSERT INTO department SET ?", {
             name: answer.newDepartmentName
         }, async (err) => {
             if (err) {
@@ -298,7 +360,7 @@ const addADepartment = async () => {
                 console.log(`Here's what may be wrong: "${err.message}"`);
             };
             console.log("");
-            console.log("The new department has been added!");
+            console.log("The new department has been added.");
         });
         await viewAllDepartments();
     })
