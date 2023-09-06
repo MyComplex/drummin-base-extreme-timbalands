@@ -37,7 +37,7 @@ To run this application, enter "node server.js" in the terminal and  hit the "En
 
 ## Example
 
-![example](./examples/sample.gif)
+![example](./assets/img/example.gif)
 
 ## License
 
